@@ -1,0 +1,123 @@
+{
+  "nodes": {
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1768555036,
+        "narHash": "sha256-Wqc7jJw2Jt92icx/HR7njCk6bzEXyUgOESp8+3MDQbs=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "1d2851ebcd64734ef057e8c80e05dd5600323792",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "release-25.11",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "overture": {
+      "inputs": {
+        "nixpkgs": "nixpkgs",
+        "stdlib-classes": "stdlib-classes",
+        "stdlib-meta": "stdlib-meta",
+        "utils": "utils"
+      },
+      "locked": {
+        "lastModified": 1768941255,
+        "narHash": "sha256-9ZTNBh41WpDVUCfnFRMGxDzjgqB+CQDhl4RRUCvPiis=",
+        "owner": "~madnat",
+        "repo": "overture",
+        "rev": "55bfe2a7eb50012d27faec0dfd3db38af56c9aac",
+        "type": "sourcehut"
+      },
+      "original": {
+        "owner": "~madnat",
+        "repo": "overture",
+        "type": "sourcehut"
+      }
+    },
+    "root": {
+      "inputs": {
+        "nixpkgs": [
+          "overture",
+          "nixpkgs"
+        ],
+        "overture": "overture",
+        "utils": [
+          "overture",
+          "utils"
+        ]
+      }
+    },
+    "stdlib-classes": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1754382520,
+        "narHash": "sha256-NaxK37VVO1Jrc4F9B5v+/yo0Pjnp4CwpH1us4Oxgby0=",
+        "owner": "agda",
+        "repo": "agda-stdlib-classes",
+        "rev": "454d18c76b0baf4095006e46cbf094e628d7d31a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "agda",
+        "ref": "v2.3",
+        "repo": "agda-stdlib-classes",
+        "type": "github"
+      }
+    },
+    "stdlib-meta": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1754389036,
+        "narHash": "sha256-ir4BxJ+XjYhB0RdBKVPd+YBaIMWzjRCq+188qKZjgdg=",
+        "owner": "agda",
+        "repo": "agda-stdlib-meta",
+        "rev": "d80dc70374f9d33c15889c2cf0c8048b4f697c4c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "agda",
+        "ref": "v2.3",
+        "repo": "agda-stdlib-meta",
+        "type": "github"
+      }
+    },
+    "systems": {
+      "locked": {
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
+      }
+    },
+    "utils": {
+      "inputs": {
+        "systems": "systems"
+      },
+      "locked": {
+        "lastModified": 1731533236,
+        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
