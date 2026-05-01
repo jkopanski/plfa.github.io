@@ -160,7 +160,43 @@ Show that `Canonical V ⦂ A` is isomorphic to `(∅ ⊢ V ⦂ A) × (Value V)`,
 that is, the canonical forms are exactly the well-typed values.
 
 ```agda
--- Your code goes here
+open import Function.Bundles using (_↔_)
+module Canonical-iso where
+  open import Data.Product using (_,_; map)
+  open import Function.Definitions using (Congruent; Inverseᵇ; Inverseʳ; Inverseˡ)
+  open import Relation.Binary.PropositionalEquality using (cong)
+
+  to : ∀ {V A} → Canonical V ⦂ A → ∅ ⊢ V ⦂ A × Value V
+  to (C-ƛ lam) = ⊢ƛ lam , V-ƛ
+  to C-zero    = ⊢zero , V-zero
+  to (C-suc s) = map ⊢suc V-suc (to s)
+
+  to-cong : ∀ {V A} → Congruent _≡_ _≡_ (to {V} {A})
+  to-cong refl = refl
+
+  from : ∀ {V A} → ∅ ⊢ V ⦂ A × Value V → Canonical V ⦂ A
+  from (⊢ƛ lam , V-ƛ)     = C-ƛ lam
+  from (⊢zero  , V-zero)  = C-zero
+  from (⊢suc s , V-suc v) = C-suc (from (s , v))
+
+  from-cong : ∀ {V A} → Congruent _≡_ _≡_ (from {V} {A})
+  from-cong refl = refl
+
+  inverseʳ : ∀ {V A} → Inverseʳ _≡_ _≡_ (to {V} {A}) from
+  inverseʳ {x = C-ƛ lam} refl = refl
+  inverseʳ {x = C-zero}  refl = refl
+  inverseʳ {x = C-suc s} refl = cong C-suc (inverseʳ refl)
+
+  inverseˡ : ∀ {V A} → Inverseˡ _≡_ _≡_ (to {V} {A}) from
+  inverseˡ {x = ⊢ƛ lam , V-ƛ}     refl = refl
+  inverseˡ {x = ⊢zero  , V-zero}  refl = refl
+  inverseˡ {x = ⊢suc s , V-suc v} refl = cong (map ⊢suc V-suc) (inverseˡ refl)
+
+  inverse : ∀ {V A} → Inverseᵇ _≡_ _≡_ (to {V} {A}) from
+  inverse = inverseˡ , inverseʳ
+
+Canonical-≃ : ∀ {V A} → Canonical V ⦂ A ↔ (∅ ⊢ V ⦂ A × Value V)
+Canonical-≃ = record { Canonical-iso }
 ```
 
 # Progress
@@ -292,7 +328,39 @@ determine its bound variable and body, `ƛ x ⇒ N`, so we can show that
 Show that `Progress M` is isomorphic to `Value M ⊎ ∃[ N ](M —→ N)`.
 
 ```agda
--- Your code goes here
+module Progress-iso where
+  open import Data.Product using (_,_; map)
+  open import Function.Definitions using (Congruent; Inverseᵇ; Inverseʳ; Inverseˡ)
+
+  to : ∀ {M} → Progress M → (Value M ⊎ ∃[ N ](M —→ N))
+  to (step s) = inj₂ (_ , s)
+  to (done v) = inj₁ v
+
+  to-cong : ∀ {M} → Congruent _≡_ _≡_ (to {M})
+  to-cong {x = step s} refl = refl
+  to-cong {x = done v} refl = refl
+
+  from : ∀ {M} → (Value M ⊎ ∃[ N ](M —→ N)) → Progress M
+  from (inj₁ v) = done v
+  from (inj₂ p) = step (p .proj₂)
+
+  from-cong : ∀ {M} → Congruent _≡_ _≡_ (from {M})
+  from-cong {x = inj₁ v} refl = refl
+  from-cong {x = inj₂ p} refl = refl
+
+  inverseʳ : ∀ {M} → Inverseʳ _≡_ _≡_ (to {M}) from
+  inverseʳ {x = step s} refl = refl
+  inverseʳ {x = done v} refl = refl
+
+  inverseˡ : ∀ {M} → Inverseˡ _≡_ _≡_ (to {M}) from
+  inverseˡ {x = inj₁ v} refl = refl
+  inverseˡ {x = inj₂ p} refl = refl
+
+  inverse : ∀ {M} → Inverseᵇ _≡_ _≡_ (to {M}) from
+  inverse = inverseˡ , inverseʳ
+
+Progress-≃ : ∀ {M} → Progress M ↔ (Value M ⊎ ∃[ N ](M —→ N))
+Progress-≃ = record { Progress-iso }
 ```
 
 ## Exercise `progress′` (practice)
@@ -301,7 +369,22 @@ Write out the proof of `progress′` in full, and compare it to the
 proof of `progress` above.
 
 ```agda
--- Your code goes here
+progress″ : ∀ M {A} → ∅ ⊢ M ⦂ A → Value M ⊎ ∃[ N ](M —→ N)
+progress″ M (⊢ƛ x) = inj₁ V-ƛ
+progress″ M (f · a) with progress″ _ f
+... | inj₂ ⟨ N , p ⟩ = inj₂ ⟨ N · _ , ξ-·₁ p ⟩
+... | inj₁ (V-ƛ {x} {N}) with progress″ _ a
+...   | inj₁ v = inj₂ ⟨ N [ x := _ ] , β-ƛ v ⟩
+...   | inj₂ p = inj₂ ⟨ (ƛ _ ⇒ _) · p .proj₁ , ξ-·₂ V-ƛ (p .proj₂) ⟩
+progress″ M ⊢zero = inj₁ V-zero
+progress″ M (⊢suc ⊢M) with progress″ _ ⊢M
+... | inj₁ v = inj₁ (V-suc v)
+... | inj₂ p = inj₂ ⟨ `suc p .proj₁ , ξ-suc (p .proj₂) ⟩
+progress″ M (⊢case {Γ} {L} {M′} {x} {N} {A} ⊢L ⊢M ⊢N) with progress″ _ ⊢L
+... | inj₁ V-zero = inj₂ ⟨ _ , β-zero ⟩
+... | inj₁ (V-suc {V} s) = inj₂ ⟨ N [ x := V ] , β-suc s ⟩
+... | inj₂ p = inj₂ ⟨ case p .proj₁ [zero⇒ _ |suc _ ⇒ _ ] , ξ-case (p .proj₂) ⟩
+progress″ M (⊢μ {Γ} {x} {N} {a} r) = inj₂ ⟨ N [ x := μ x ⇒ N ] , β-μ ⟩
 ```
 
 ## Exercise `value?` (practice)
@@ -310,8 +393,10 @@ Combine `progress` and `—→¬V` to write a program that decides
 whether a well-typed term is a value:
 
 ```agda
-postulate
-  value? : ∀ {A M} → ∅ ⊢ M ⦂ A → Dec (Value M)
+value? : ∀ {A M} → ∅ ⊢ M ⦂ A → Dec (Value M)
+value? typing with progress typing
+... | step p = no (—→¬V p)
+... | done v = yes v
 ```
 
 # Prelude to preservation
@@ -763,7 +848,34 @@ defined by mutual recursion with the proof that substitution
 preserves types.
 
 ```agda
--- Your code goes here
+f′ :
+  ∀ {Γ V A A′ B M} x y →
+  (⊢M : Γ , y ⦂ A , x ⦂ A′ ⊢ M ⦂ B) →
+  (⊢V : ∅ ⊢ V ⦂ A) →
+  Γ , x ⦂ A′ ⊢ f x y V M ⦂ B
+
+subst′ : ∀ {Γ x N V A B}
+  → ∅ ⊢ V ⦂ A
+  → Γ , x ⦂ A ⊢ N ⦂ B
+    --------------------
+  → Γ ⊢ N [ x := V ]′ ⦂ B
+subst′ {x = y} ⊢V (⊢` {x = x} Z) with x ≟ y
+… | yes _  = weaken ⊢V
+… | no x≢y = contradiction refl x≢y
+subst′ {x = y} ⊢V (⊢` {x = x} (S x≢y ∋x)) with x ≟ y
+… | yes refl = contradiction refl x≢y
+… | no _     = ⊢` ∋x
+subst′ {x = y} ⊢V (⊢ƛ {x = x} ⊢N) = ⊢ƛ (f′ x y ⊢N ⊢V)
+subst′ {x = y} ⊢V (⊢L · ⊢M) = subst′ ⊢V ⊢L · subst′ ⊢V ⊢M
+subst′ {x = y} ⊢V ⊢zero = ⊢zero
+subst′ {x = y} ⊢V (⊢suc ⊢N) = ⊢suc (subst′ ⊢V ⊢N)
+subst′ {x = y} ⊢V (⊢case {x = x} ⊢L ⊢M ⊢N) =
+  ⊢case (subst′ ⊢V ⊢L) (subst′ ⊢V ⊢M) (f′ x y ⊢N ⊢V) 
+subst′ {x = y} ⊢V (⊢μ {x = x} ⊢M) = ⊢μ (f′ x y ⊢M ⊢V)
+
+f′ x y ⊢M ⊢V with x ≟ y
+… | yes refl = drop ⊢M
+… | no  x≢y  = subst′ ⊢V (swap x≢y ⊢M)
 ```
 
 
